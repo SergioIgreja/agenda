@@ -12,16 +12,18 @@ import {
         createDrawerNavigator
 } from "react-navigation"
 
-const homeTabNavigator = createBottomTabNavigator({
-        Tasks: { screen: TasksScreen },
-        Alarms: { screen: AlarmsScreen }
-}, {
+const homeTabNavigator = createBottomTabNavigator(
+        {
+                Tasks: { screen: TasksScreen },
+                Alarms: { screen: AlarmsScreen },
+        }, {
                 navigationOptions: ({ navigation }) => {
                         const { routeName } = navigation.state.routes[navigation.state.index]
                         return {
                                 headerTitle: routeName
                         }
-                }
+                },
+                initialRouteName: 'Alarms',
         })
 
 const homeStackNavigator = createStackNavigator({
