@@ -3,15 +3,20 @@ import PercentageCircle from 'react-native-percentage-circle';
 import {
     Text,
     TouchableOpacity,
+    Dimensions,
     View,
     StyleSheet,
     Vibration,
 } from 'react-native';
+import PlayIcon from "assets/components/PlayIcon";
+import StopIcon from "assets/components/StopIcon";
+import ResetIcon from "assets/components/ResetIcon";
 
 export default class AlarmsScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { 
+        this.state = {
+            numberOfSprints: 0,
             seconds: 10,
             countDown: false,
             interval: null,
@@ -20,6 +25,8 @@ export default class AlarmsScreen extends React.Component {
     }
 
     reset() {
+        clearInterval(this.state.interval);
+
         this.setState({
             seconds: 10,
             countDown: false,
@@ -55,8 +62,7 @@ export default class AlarmsScreen extends React.Component {
             seconds: this.state.seconds - 1
         })
         this.calculatePercentage()
-        if(this.state.seconds === 0) {
-            this.stopTimer();
+        if (this.state.seconds === 0) {
             Vibration.vibrate();
             this.reset();
         }
@@ -64,7 +70,7 @@ export default class AlarmsScreen extends React.Component {
 
     startTimer() {
         let interval = setInterval(() => {
-            if((this.state.seconds > 0 ) && this.state.countDown) {
+            if ((this.state.seconds > 0) && this.state.countDown) {
                 this.tick()
             }
         }, 1000);
@@ -82,21 +88,31 @@ export default class AlarmsScreen extends React.Component {
         const minutes = Math.floor(this.state.seconds / 60);
         const seconds = this.state.seconds % 60;
 
-        return `${minutes}:${seconds}`;
+        return `${this.pad(minutes)}:${this.pad(seconds)}`;
+    }
+
+    pad(d) {
+        return (d < 10) ? '0' + d.toString() : d.toString();
     }
 
     render() {
         return (
             <View style={styles.container}>
-                <PercentageCircle radius={150} bgcolor='#000' color='#f39c12' borderWidth={20} percent={this.state.percentage} padding={10}>
+                <View style={{ flex: 1, flexDirection:'row', justifyContent: 'space-between', width: Dimensions.get('window').width}}>
+                    <View style={styles.sprints}><Text style={styles.text}>{this.state.numberOfSprints}</Text></View>
+                    <TouchableOpacity onPress={() => {this.reset()}}>
+                        <ResetIcon></ResetIcon>
+                    </TouchableOpacity>
+                </View>
+                <PercentageCircle radius={150} bgcolor='#000' color='#f39c12' borderWidth={20} percent={this.state.percentage}>
                     <Text style={styles.time}>{this.secondsToMinutes()}</Text>
                 </PercentageCircle>
                 <View style={styles.buttonsContainer}>
-                    <TouchableOpacity style={this.state.countDown ? styles.buttonDisabled : styles.button} onPress={() => this.startTimer()} disabled={this.state.countDown}>
-                        <Text style={styles.text}>Start</Text>
+                    <TouchableOpacity onPress={() => this.startTimer()} style={this.state.countDown ? styles.buttonDisabled : styles.button} disabled={this.state.countDown}>
+                        <PlayIcon />
                     </TouchableOpacity>
-                    <TouchableOpacity style={this.state.countDown ? styles.button : styles.buttonDisabled} onPress={() => this.stopTimer()} disabled={!this.state.countDown}>
-                        <Text style={styles.text}>Stop</Text>
+                    <TouchableOpacity onPress={() => this.stopTimer()} style={!this.state.countDown ? styles.buttonDisabled : styles.button} disabled={!this.state.countDown}>
+                        <StopIcon />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -123,38 +139,29 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     button: {
-        backgroundColor: '#f39c12',
-        width: '30%',
-        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
         opacity: 1.0
     },
     buttonDisabled: {
-        backgroundColor: '#f39c12',
-        width: '30%',
-        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 10,
-        marginRight: 10,
+        alignSelf: 'center',
         opacity: 0.3
     },
     text: {
         fontSize: 25,
     },
-    progressLayer: {
-        width: 300,
-        height: 300,
-        borderWidth: 10,
-        borderRadius: 150,
-        position: 'absolute',
-        borderLeftColor: 'transparent',
-        borderBottomColor: 'transparent',
-        borderRightColor: '#3498db',
-        borderTopColor: '#3498db',
+    sprints: {
+        width: 45,
+        height: 45,
+        alignSelf:'flex-start',
+        backgroundColor: '#f39c12',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 10,
+        marginTop: 9,
+        borderRadius: 22.5
     }
 
 });
